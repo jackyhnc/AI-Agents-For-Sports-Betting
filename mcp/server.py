@@ -1,8 +1,11 @@
 import os
 import requests
 from fastmcp import FastMCP
+from fastapi import FastAPI
+import uvicorn
 
 import dotenv
+
 dotenv.load_dotenv()
 
 mcp = FastMCP("NBA Data 🏀")
@@ -10,18 +13,22 @@ mcp = FastMCP("NBA Data 🏀")
 SPORTRADAR_API_KEY = os.environ.get("SPORTRADAR_API_KEY")
 BASE_URL = "https://api.sportradar.us/nba/trial/v8/en"
 
+
 def _make_request(endpoint: str) -> dict:
     """Helper to make requests to SportsRadar API"""
     if not SPORTRADAR_API_KEY:
         raise ValueError("SPORTRADAR_API_KEY environment variable is not set")
-    
+
     url = f"{BASE_URL}/{endpoint}.json?api_key={SPORTRADAR_API_KEY}"
+    print(url)
     try:
         response = requests.get(url)
         response.raise_for_status()
+        print(response.json())
         return response.json()
     except requests.exceptions.RequestException as e:
         return {"error": str(e)}
+
 
 @mcp.resource("nba://league/daily-change-log/{date}")
 def get_daily_change_log(date: str) -> str:
@@ -40,6 +47,7 @@ def get_daily_change_log(date: str) -> str:
     except Exception as e:
         return f"Error fetching daily change log: {str(e)}"
 
+
 @mcp.resource("nba://league/daily-injuries/{date}")
 def get_daily_injuries(date: str) -> str:
     """
@@ -56,6 +64,7 @@ def get_daily_injuries(date: str) -> str:
         return str(data)
     except Exception as e:
         return f"Error fetching daily injuries: {str(e)}"
+
 
 @mcp.resource("nba://league/daily-transfers/{date}")
 def get_daily_transfers(date: str) -> str:
@@ -74,6 +83,7 @@ def get_daily_transfers(date: str) -> str:
     except Exception as e:
         return f"Error fetching daily transfers: {str(e)}"
 
+
 @mcp.resource("nba://league/hierarchy")
 def get_league_hierarchy() -> str:
     """
@@ -86,6 +96,7 @@ def get_league_hierarchy() -> str:
     data = _make_request(endpoint)
     return str(data)
 
+
 @mcp.resource("nba://league/seasons")
 def get_seasons() -> str:
     """
@@ -96,6 +107,7 @@ def get_seasons() -> str:
     endpoint = "league/seasons"
     data = _make_request(endpoint)
     return str(data)
+
 
 @mcp.resource("nba://league/free-agents")
 def get_free_agents() -> str:
@@ -108,6 +120,7 @@ def get_free_agents() -> str:
     data = _make_request(endpoint)
     return str(data)
 
+
 @mcp.resource("nba://league/injuries")
 def get_league_injuries() -> str:
     """
@@ -118,6 +131,7 @@ def get_league_injuries() -> str:
     endpoint = "league/injuries"
     data = _make_request(endpoint)
     return str(data)
+
 
 @mcp.resource("nba://games/{date}")
 def get_daily_schedule(date: str) -> str:
@@ -136,6 +150,7 @@ def get_daily_schedule(date: str) -> str:
     except Exception as e:
         return f"Error fetching schedule: {str(e)}"
 
+
 @mcp.resource("nba://series/{year}/{season_type}/schedule")
 def get_series_schedule(year: int, season_type: str) -> str:
     """
@@ -150,6 +165,7 @@ def get_series_schedule(year: int, season_type: str) -> str:
     data = _make_request(endpoint)
     return str(data)
 
+
 @mcp.tool
 def get_league_leaders(year: int, season_type: str) -> dict:
     """
@@ -163,6 +179,7 @@ def get_league_leaders(year: int, season_type: str) -> dict:
     endpoint = f"seasons/{year}/{season_type}/leaders"
     return _make_request(endpoint)
 
+
 @mcp.tool
 def get_rankings(year: int, season_type: str) -> dict:
     """
@@ -175,6 +192,7 @@ def get_rankings(year: int, season_type: str) -> dict:
     """
     endpoint = f"seasons/{year}/{season_type}/rankings"
     return _make_request(endpoint)
+
 
 @mcp.tool
 def get_seasonal_statistics(year: int, season_type: str, team_id: str) -> dict:
@@ -190,6 +208,7 @@ def get_seasonal_statistics(year: int, season_type: str, team_id: str) -> dict:
     endpoint = f"seasons/{year}/{season_type}/teams/{team_id}/statistics"
     return _make_request(endpoint)
 
+
 @mcp.tool
 def get_series_statistics(series_id: str, team_id: str) -> dict:
     """
@@ -202,6 +221,7 @@ def get_series_statistics(series_id: str, team_id: str) -> dict:
     """
     endpoint = f"series/{series_id}/teams/{team_id}/statistics"
     return _make_request(endpoint)
+
 
 @mcp.resource("nba://standings/{year}/{season_type}")
 def get_standings(year: int, season_type: str) -> str:
@@ -217,6 +237,7 @@ def get_standings(year: int, season_type: str) -> str:
     data = _make_request(endpoint)
     return str(data)
 
+
 @mcp.tool
 def get_game_boxscore(game_id: str) -> dict:
     """
@@ -230,6 +251,7 @@ def get_game_boxscore(game_id: str) -> dict:
     endpoint = f"games/{game_id}/boxscore"
     return _make_request(endpoint)
 
+
 @mcp.tool
 def get_game_play_by_play(game_id: str) -> dict:
     """
@@ -241,6 +263,7 @@ def get_game_play_by_play(game_id: str) -> dict:
     """
     endpoint = f"games/{game_id}/pbp"
     return _make_request(endpoint)
+
 
 @mcp.tool
 def get_game_summary(game_id: str) -> dict:
@@ -254,6 +277,7 @@ def get_game_summary(game_id: str) -> dict:
     endpoint = f"games/{game_id}/summary"
     return _make_request(endpoint)
 
+
 @mcp.tool
 def get_team_profile(team_id: str) -> dict:
     """
@@ -265,6 +289,7 @@ def get_team_profile(team_id: str) -> dict:
     """
     endpoint = f"teams/{team_id}/profile"
     return _make_request(endpoint)
+
 
 @mcp.tool
 def get_player_profile(player_id: str) -> dict:
@@ -278,6 +303,7 @@ def get_player_profile(player_id: str) -> dict:
     endpoint = f"players/{player_id}/profile"
     return _make_request(endpoint)
 
+
 @mcp.tool
 def get_team_depth_chart(team_id: str) -> dict:
     """
@@ -289,6 +315,7 @@ def get_team_depth_chart(team_id: str) -> dict:
     """
     endpoint = f"teams/{team_id}/depth_chart"
     return _make_request(endpoint)
+
 
 @mcp.tool
 def get_season_teams(year: int, season_type: str) -> dict:
@@ -305,7 +332,9 @@ def get_season_teams(year: int, season_type: str) -> dict:
     endpoint = f"seasons/{year}/{season_type}/teams"
     return _make_request(endpoint)
 
+
 # Splits Endpoints
+
 
 @mcp.tool
 def get_game_splits(game_id: str) -> dict:
@@ -318,6 +347,7 @@ def get_game_splits(game_id: str) -> dict:
     """
     endpoint = f"games/{game_id}/splits"
     return _make_request(endpoint)
+
 
 @mcp.tool
 def get_season_splits(year: int, season_type: str, team_id: str) -> dict:
@@ -333,6 +363,7 @@ def get_season_splits(year: int, season_type: str, team_id: str) -> dict:
     endpoint = f"seasons/{year}/{season_type}/teams/{team_id}/splits"
     return _make_request(endpoint)
 
+
 @mcp.tool
 def get_in_game_splits(year: int, season_type: str, team_id: str) -> dict:
     """
@@ -346,6 +377,7 @@ def get_in_game_splits(year: int, season_type: str, team_id: str) -> dict:
     """
     endpoint = f"seasons/{year}/{season_type}/teams/{team_id}/splits/ingame"
     return _make_request(endpoint)
+
 
 @mcp.tool
 def get_schedule_splits(year: int, season_type: str, team_id: str) -> dict:
@@ -361,6 +393,7 @@ def get_schedule_splits(year: int, season_type: str, team_id: str) -> dict:
     endpoint = f"seasons/{year}/{season_type}/teams/{team_id}/splits/schedule"
     return _make_request(endpoint)
 
+
 @mcp.tool
 def get_hierarchy_splits(year: int, season_type: str, team_id: str) -> dict:
     """
@@ -375,5 +408,6 @@ def get_hierarchy_splits(year: int, season_type: str, team_id: str) -> dict:
     endpoint = f"seasons/{year}/{season_type}/teams/{team_id}/splits/hierarchy"
     return _make_request(endpoint)
 
+
 if __name__ == "__main__":
-    mcp.run()
+    mcp.run(transport="http", host="0.0.0.0", port=8765)
