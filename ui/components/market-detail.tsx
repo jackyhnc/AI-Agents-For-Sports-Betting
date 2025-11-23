@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 
 interface Market {
+  rules_primary: string
   id: string
   matchup: string
   sport: string

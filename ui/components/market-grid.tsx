@@ -66,6 +66,7 @@ export default function MarketGrid() {
           const noPct = 100 - yesPct
 
           return {
+            rules_primary: k.rules_primary,
             id: k.ticker || `market-${index}`,
             matchup: k.rules_primary || "Unknown Market",
             sport: "Basketball",
