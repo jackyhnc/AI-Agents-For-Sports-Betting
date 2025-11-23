@@ -1,0 +1,811 @@
+{
+    "text": "Who is winning NBA Game tonight, Detroit or Milwaukee",
+    "level": 0,
+    "children": [
+        {
+            "text": "What is the current score of the NBA game between Detroit and Milwaukee?",
+            "level": 1,
+            "children": [
+                {
+                    "text": "What time did the game between Detroit and Milwaukee start?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What is the date of the game between Detroit and Milwaukee?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Which league or sport is the game between Detroit and Milwaukee part of?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the time zone for the location of the game between Detroit and Milwaukee?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Where can the official game schedule be found for the game between Detroit and Milwaukee?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Has the game between Detroit and Milwaukee been rescheduled, and if so, at what time?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "What platform provides live scoring updates for NBA games?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What official NBA website provides live scoring updates for NBA games?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Which mobile apps offer live scoring updates for NBA games?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What sports news websites provide live scoring updates for NBA games?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Are there any social media platforms that offer live updates for NBA game scores?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the significance of ESPN in providing live scoring updates for NBA games?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "What is the current quarter of the game between Detroit and Milwaukee?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What is the date of the game between Detroit and Milwaukee?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the score of the game at the current time?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "How many quarters have been played so far in the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the official starting time of the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the current time in relation to the game being played?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "What are the latest points scored by each team in the game?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What is the current score for Team A in the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the current score for Team B in the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What was the last point scored by Team A?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What was the last point scored by Team B?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the total score of both teams combined in the game?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "Are there any significant player injuries reported in the game?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "Which players are reported to have injuries in the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the nature of the injuries reported for each player?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the expected recovery time for the injured players?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Are there any players who are game-time decisions due to injuries?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "How do these injuries impact the team's overall performance and strategy?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "text": "How much time is left in the game between Detroit and Milwaukee?",
+            "level": 1,
+            "children": [
+                {
+                    "text": "What is the current score of the game between Detroit and Milwaukee?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What sport is being played between Detroit and Milwaukee?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What platform or source can provide live scores for the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the date and time of the game between Detroit and Milwaukee?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Have the teams played each other before in this season, and what was the outcome?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Is the game currently in progress or has it already finished?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "How much time is remaining in the current quarter or half of the game?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What is the current time on the game clock?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the total duration of the current quarter or half?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "How much time has already elapsed in the current quarter or half?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Is the game clock stopped, and if so, why?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What sport is being played, and what are the standard durations for its quarters or halves?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "What is the standard length of a game for the league that Detroit and Milwaukee are competing in?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What league are the Detroit and Milwaukee teams competing in?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the standard length of a game in that league (in terms of time)?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "How many periods or quarters does a standard game consist of in that league?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the typical duration of each period or quarter in that league?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Are there any overtime rules in that league, and if so, how does that affect game length?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "Are there any stoppages, such as timeouts or fouls, affecting the game clock?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "Is there an official timeout currently in effect during the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Have there been any player fouls called that would result in stoppage of play?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Are there any injuries that require a stoppage and a timeout?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Is the referee reviewing any plays that could cause a delay in the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the current time remaining on the game clock?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "Has there been any additional time added to the game due to stoppages?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What were the reasons for any stoppages in the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "How much total stoppage time was recorded during the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Were the stoppages due to injuries, substitutions, or other events?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "How did the officials indicate any added time at the end of the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the official ruling or report regarding the added time for this game?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "text": "What are the key player statistics for Detroit in tonight's game?",
+            "level": 1,
+            "children": [
+                {
+                    "text": "What are the leading scorers for Detroit in tonight's game?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "Who scored the first goal for Detroit in tonight's game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the total number of goals scored by each Detroit player in tonight's game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Who assisted on the goals scored by Detroit in tonight's game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What are the shot statistics for the leading scorers of Detroit in tonight's game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "How many points (goals + assists) do the leading scorers from Detroit have in tonight's game?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "How many rebounds did Detroit players have in tonight's game?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What was the final score of the game involving the Detroit players?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "How many total rebounds were recorded in the game by both teams?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Which players on the Detroit team logged minutes in the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What were the individual rebound statistics for each Detroit player who played in the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Is there a box score or official report available for the game detailing the rebounds by each Detroit player?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "What are the assist statistics for Detroit in tonight's game?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What is the final score of the game between Detroit and their opponent?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "How many total assists did Detroit players record in the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Who were the top three players on Detroit with the most assists?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the average number of assists per player for the Detroit team in this game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Did any Detroit player achieve a double-digit assist total in this game?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "What were the field goal percentages for Detroit players in tonight's game?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What is the total number of field goals attempted by each Detroit player in the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "How many field goals did each Detroit player successfully make in the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the formula used to calculate the field goal percentage for basketball players?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What was the game time or duration of the game for which the statistics are being requested?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Are there any players on the Detroit team who did not attempt any field goals in tonight's game?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "How many turnovers did Detroit commit in tonight's game?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What was the final score of the Detroit game tonight?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Who were the opponents of the Detroit team in tonight's game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What source provides the official statistics for the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "How many total turnovers were committed by both teams in tonight's game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Where can I find a recap of the game statistics, including turnovers?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "text": "What are the key player statistics for Milwaukee in tonight's game?",
+            "level": 1,
+            "children": [
+                {
+                    "text": "What is the total points scored by each key player for the Milwaukee team in tonight's game?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "Who are considered the key players for the Milwaukee team in tonight's game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What was the final score of the Milwaukee team in tonight's game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "How many points did each key player score individually in tonight's game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Are there any assists or rebounds recorded by the key players that might affect their overall contribution?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the official source for the game statistics of the Milwaukee team from tonight?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "How many rebounds did each key player for Milwaukee grab in tonight's game?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What is the date of the game in question?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Who are the key players for the Milwaukee team?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the final box score for the Milwaukee game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "How many rebounds did each key player have according to the box score?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What were the statistics for the opposing team that might affect the rebound count?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "What was the field goal percentage of each key player for Milwaukee in tonight's game?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What was the total number of field goals attempted by each key player for Milwaukee in the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "How many field goals did each key player for Milwaukee successfully make in the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Who are considered the key players for Milwaukee in the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the formula to calculate field goal percentage?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What was the final score of the game, and how did it impact the individual performances?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "How many assists did each key player for Milwaukee record in tonight's game?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What is the final score of the Milwaukee game tonight?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Who were the key players for Milwaukee in tonight's game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "How many assists did each of the key players record in tonight's game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What was the timeframe of the game for Milwaukee tonight?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Did any of the key players for Milwaukee have a double-digit assist count tonight?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "What was the number of turnovers committed by each key player for Milwaukee in tonight's game?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What is the final score of the Milwaukee game tonight?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Who were the key players for Milwaukee in tonight's game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "How many turnovers did each key player commit during the game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What statistics were recorded for the competitors in tonight's Milwaukee game?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Were there any notable plays or events that led to the turnovers in tonight's game?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "text": "What are the latest updates from sports news sources regarding the game?",
+            "level": 1,
+            "children": [
+                {
+                    "text": "What were the final scores of the latest games covered in sports news?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What sports leagues had games reported in the latest sports news?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What were the final scores of each game reported in the latest sports news?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Who were the teams that played in the latest games reported?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What dates were the games covered in the latest sports news?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Is there any notable highlights or events from the games that could affect future matches?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "What key player injuries were reported from the latest games?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "Which players were reported injured in the latest games?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What types of injuries were reported for each player?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "In which specific games did these injuries occur?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What is the estimated recovery time for the injured players?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Have any of the injured players been ruled out for upcoming games?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "Which teams were highlighted in today's sports news updates?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What sports news outlets reported updates today?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What teams were mentioned in today's headlines of each sports news outlet?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What specific games or matches involving these teams were discussed in the updates?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Were there any notable player performances or incidents related to the highlighted teams?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Did any teams receive awards or recognition in today's news updates?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "What significant plays or events were mentioned in recent game reports?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What teams played in the recent games that were reported on?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What were the key plays that impacted the score of the games?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Were there any notable player performances mentioned in the reports?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Did any events occur during the games that deviated from typical gameplay (e.g. injuries, controversial calls)?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What was the final score of each game mentioned in the reports?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "text": "What expert analyses or opinions were shared in the latest sports news articles?",
+                    "level": 2,
+                    "children": [
+                        {
+                            "text": "What specific sports news articles were published most recently?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "Who are the experts or analysts cited in these articles?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What were the main topics or events discussed in these articles?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "What opinions or analyses were provided by the experts regarding these topics?",
+                            "level": 3,
+                            "children": []
+                        },
+                        {
+                            "text": "How have these expert analyses been received by fans and commentators?",
+                            "level": 3,
+                            "children": []
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
