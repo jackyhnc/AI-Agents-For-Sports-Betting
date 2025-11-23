@@ -1,0 +1,43 @@
+{
+    "text": "Who is winning Lakers vs 76ers?",
+    "level": 0,
+    "children": [
+        {
+            "text": "Are the Lakers currently ahead in the game against the 76ers?",
+            "level": 1,
+            "children": [],
+            "answer": "I cannot determine if the Lakers are currently ahead in the game against the 76ers due to lack of real-time data access.",
+            "probability_score": 0.0
+        },
+        {
+            "text": "Is the score margin between the Lakers and 76ers in favor of the Lakers?",
+            "level": 1,
+            "children": [],
+            "answer": "The score margin between the Lakers and 76ers cannot be determined as being in favor of the Lakers without specific data from the most recent game between the two teams. Thus, I cannot confirm if the score margin is in favor of the Lakers.",
+            "probability_score": 0.5
+        },
+        {
+            "text": "Has the Lakers team scored more points than the 76ers during the game so far?",
+            "level": 1,
+            "children": [],
+            "answer": "I couldn't determine if the Lakers scored more points than the 76ers because I need more information about the specific game.",
+            "probability_score": 0.5
+        },
+        {
+            "text": "Are the Lakers leading with less than 2 minutes remaining in the game?",
+            "level": 1,
+            "children": [],
+            "answer": "I do not have the specific game details to check if the Lakers are leading with less than 2 minutes remaining in a particular game.",
+            "probability_score": 0.0
+        },
+        {
+            "text": "Is the Lakers' winning probability, as per odds or predictions, higher than that of the 76ers?",
+            "level": 1,
+            "children": [],
+            "answer": "I am unable to determine the current winning probabilities from sportsbooks or prediction models for the Lakers compared to the 76ers as this requires real-time data. Therefore, I cannot conclude if the Lakers' winning probability is higher.",
+            "probability_score": 0.5
+        }
+    ],
+    "answer": "I currently do not have enough information to determine the winner of the Lakers vs 76ers game. Please provide a specific date for the game.",
+    "probability_score": 0.0
+}
