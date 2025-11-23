@@ -1,413 +1,623 @@
 import os
+import time
 import requests
 from fastmcp import FastMCP
-from fastapi import FastAPI
-import uvicorn
-
 import dotenv
 
 dotenv.load_dotenv()
 
 mcp = FastMCP("NBA Data 🏀")
 
-SPORTRADAR_API_KEY = os.environ.get("SPORTRADAR_API_KEY")
-BASE_URL = "https://api.sportradar.us/nba/trial/v8/en"
+API_KEY = os.environ.get("SPORTRADAR_API_KEY")
+ACCESS = "trial"
+LANG = "en"
+BASE = f"https://api.sportradar.com/nba/{ACCESS}/v8/{LANG}"
+
+MAX_RETRIES = 3
+RETRY_DELAY = 1
 
 
-def _make_request(endpoint: str) -> dict:
-    """Helper to make requests to SportsRadar API"""
-    if not SPORTRADAR_API_KEY:
-        raise ValueError("SPORTRADAR_API_KEY environment variable is not set")
-
-    url = f"{BASE_URL}/{endpoint}.json?api_key={SPORTRADAR_API_KEY}"
-    print(url)
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        print(response.json())
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        return {"error": str(e)}
-
-
-@mcp.resource("nba://league/daily-change-log/{date}")
-def get_daily_change_log(date: str) -> str:
+def _request(url: str, retries: int = MAX_RETRIES):
     """
-    Get IDs and timestamps for updated teams, players, game statistics, schedules, and standings.
-    Args:
-        date: Date in YYYY-MM-DD format
+    Generic HTTP GET handler with retry logic.
+
+    Attempts network call up to `retries` times, using exponential backoff.
+    Retries are triggered for network errors, timeouts, and 429/5xx responses.
+
+    Parameters:
+        url (str): Fully formatted Sportradar endpoint URL
+        retries (int): Number of retry attempts
+
     Returns:
-        JSON object containing 'changes' list with 'id', 'type' (e.g. 'team', 'player'), and 'timestamp'.
+        dict: JSON response from Sportradar or an error message
     """
-    try:
-        y, m, d = date.split("-")
-        endpoint = f"league/daily_change_log/{y}/{m}/{d}"
-        data = _make_request(endpoint)
-        return str(data)
-    except Exception as e:
-        return f"Error fetching daily change log: {str(e)}"
+    if not API_KEY:
+        return {"error": "SPORTRADAR_API_KEY not set"}
+
+    headers = {"accept": "application/json", "x-api-key": API_KEY}
+
+    for attempt in range(retries):
+        try:
+            print(url)
+            resp = requests.get(url, headers=headers, timeout=30)
+            resp.raise_for_status()
+            res = resp.json()
+            # Estimate token count as num words ≈ n tokens, so use len(str(res).split())
+            max_tokens = 100000
+            js = str(res)
+            word_count = len(js.split())
+            if word_count > max_tokens:
+                print(
+                    f"Response too large ({word_count} tokens), trimming to last {max_tokens} tokens"
+                )
+                js_words = js.split()
+                js_trimmed = " ".join(js_words[:max_tokens])
+                try:
+                    import ast
+
+                    res = ast.literal_eval(js_trimmed)
+                except Exception:
+                    res = js_trimmed
+            print("--------------------------------")
+            print(f"Response length: {len(res)}")
+            return res
+
+        except requests.exceptions.HTTPError as e:
+            code = e.response.status_code
+
+            if code in (429, 500, 502, 503, 504) and attempt < retries - 1:
+                delay = RETRY_DELAY * (2**attempt)
+                time.sleep(delay)
+                continue
+
+            return {"error": f"HTTP {code}: {e.response.reason}"}
+
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+            if attempt < retries - 1:
+                delay = RETRY_DELAY * (2**attempt)
+                time.sleep(delay)
+                continue
+            return {"error": str(e)}
+
+        except Exception as e:
+            return {"error": str(e)}
+
+    return {"error": "Request failed after retries"}
 
 
-@mcp.resource("nba://league/daily-injuries/{date}")
-def get_daily_injuries(date: str) -> str:
+# ============================================================
+# DAILY ENDPOINTS (3)
+# ============================================================
+
+
+@mcp.resource("nba://daily/change-log/{date}")
+def daily_change_log(date: str):
     """
-    Get details for all injuries updated on a given date.
-    Args:
-        date: Date in YYYY-MM-DD format
+    Daily Change Log
+
+    URL Format:
+        league/{year}/{month}/{day}/changes.json
+
+    Description:
+        Provides IDs and timestamps for all modified NBA data (teams, players,
+        schedules, standings, statistics) for a given date.
+
+    Parameters:
+        date (str): Date in YYYY-MM-DD format
+
     Returns:
-        JSON object with 'injuries' list containing player info, injury description, status, and update date.
+        dict: JSON response containing the change log
     """
-    try:
-        y, m, d = date.split("-")
-        endpoint = f"league/injuries/{y}/{m}/{d}"
-        data = _make_request(endpoint)
-        return str(data)
-    except Exception as e:
-        return f"Error fetching daily injuries: {str(e)}"
+    y, m, d = date.split("-")
+    url = f"{BASE}/league/{y}/{m}/{d}/changes.json"
+    return str(_request(url))
 
 
-@mcp.resource("nba://league/daily-transfers/{date}")
-def get_daily_transfers(date: str) -> str:
+@mcp.resource("nba://daily/injuries/{date}")
+def daily_injuries(date: str):
     """
-    Get information on player transfers added or edited during the day.
-    Args:
-        date: Date in YYYY-MM-DD format
+    Daily Injuries
+
+    URL Format:
+        league/{year}/{month}/{day}/daily_injuries.json
+
+    Description:
+        Returns all injury updates applied on the specified date.
+
+    Parameters:
+        date (str): Date in YYYY-MM-DD format
+
     Returns:
-        JSON object with 'transfers' list containing player info, from/to team info, and effective date.
+        dict: JSON containing daily injury updates
     """
-    try:
-        y, m, d = date.split("-")
-        endpoint = f"league/transfers/{y}/{m}/{d}"
-        data = _make_request(endpoint)
-        return str(data)
-    except Exception as e:
-        return f"Error fetching daily transfers: {str(e)}"
+    y, m, d = date.split("-")
+    url = f"{BASE}/league/{y}/{m}/{d}/daily_injuries.json"
+    return str(_request(url))
 
 
-@mcp.resource("nba://league/hierarchy")
-def get_league_hierarchy() -> str:
+@mcp.resource("nba://daily/schedule/{date}")
+def daily_schedule(date: str):
     """
-    Get the organizational structure of the league (conferences, divisions, teams).
+    Daily Schedule
+
+    URL Format:
+        games/{year}/{month}/{day}/schedule.json
+
+    Description:
+        Provides all NBA games scheduled for the given day, with full venue and
+        matchup metadata.
+
+    Parameters:
+        date (str): Date in YYYY-MM-DD format
+
     Returns:
-        JSON object with 'conferences' list. Each conference has 'divisions', which have 'teams'.
-        Teams contain 'id', 'name', 'market', 'alias', and venue info.
+        dict: JSON containing the daily schedule
     """
-    endpoint = "league/hierarchy"
-    data = _make_request(endpoint)
-    return str(data)
+    y, m, d = date.split("-")
+    url = f"{BASE}/games/{y}/{m}/{d}/schedule.json"
+    return str(_request(url))
 
 
-@mcp.resource("nba://league/seasons")
-def get_seasons() -> str:
+# ============================================================
+# GAME ENDPOINTS (2)
+# ============================================================
+
+
+@mcp.resource("nba://game/pbp/{game_id}")
+def game_play_by_play(game_id: str):
     """
-    Get list of available seasons.
+    Game Play-by-Play
+
+    URL Format:
+        games/{game_id}/pbp.json
+
+    Description:
+        Returns real-time detailed event logs for every possession, action,
+        substitution, shot, turnover, foul, and play participant.
+
+    Parameters:
+        game_id (str): Unique Sportradar game identifier
+
     Returns:
-        JSON object with 'seasons' list containing 'id', 'year', 'type' (REG/PRE/PST), and dates.
+        dict: JSON play-by-play feed
     """
-    endpoint = "league/seasons"
-    data = _make_request(endpoint)
-    return str(data)
+    url = f"{BASE}/games/{game_id}/pbp.json"
+    return str(_request(url))
 
 
-@mcp.resource("nba://league/free-agents")
-def get_free_agents() -> str:
+@mcp.resource("nba://game/summary/{game_id}")
+def game_summary(game_id: str):
     """
-    Get list of free agents.
+    Game Summary
+
+    URL Format:
+        games/{game_id}/summary.json
+
+    Description:
+        Provides top-level boxscore statistics, team scoring breakdowns,
+        player stats, starters, officials, and venue details.
+
+    Parameters:
+        game_id (str): Unique Sportradar game identifier
+
     Returns:
-        JSON object with 'free_agents' list containing player bio info (id, name, position, etc.).
+        dict: JSON containing game summary information
     """
-    endpoint = "league/free_agents"
-    data = _make_request(endpoint)
-    return str(data)
+    url = f"{BASE}/games/{game_id}/summary.json"
+    return str(_request(url))
+
+
+# ============================================================
+# LEAGUE ENDPOINTS (7)
+# ============================================================
 
 
 @mcp.resource("nba://league/injuries")
-def get_league_injuries() -> str:
+def league_injuries():
     """
-    Get general injury information for the league.
+    League Injuries
+
+    URL Format:
+        league/injuries.json
+
+    Description:
+        Provides all active player injuries across all NBA teams.
+
     Returns:
-        JSON object with 'teams' list. Each team contains 'players' list with injury details.
+        dict: JSON containing league-wide injury data
     """
-    endpoint = "league/injuries"
-    data = _make_request(endpoint)
-    return str(data)
+    url = f"{BASE}/league/injuries.json"
+    return str(_request(url))
 
 
-@mcp.resource("nba://games/{date}")
-def get_daily_schedule(date: str) -> str:
+@mcp.resource("nba://league/hierarchy")
+def league_hierarchy():
     """
-    Get the NBA daily schedule for a specific date.
-    Args:
-        date: Date in YYYY-MM-DD format
+    League Hierarchy
+
+    URL Format:
+        league/hierarchy.json
+
+    Description:
+        Provides league → conference → division → team structure including
+        venue associations.
+
     Returns:
-        JSON object with 'games' list. Each game contains 'id', 'status', 'scheduled', 'home', 'away', and venue info.
+        dict: JSON hierarchy definition
     """
-    try:
-        y, m, d = date.split("-")
-        endpoint = f"games/{y}/{m}/{d}/schedule"
-        data = _make_request(endpoint)
-        return str(data)
-    except Exception as e:
-        return f"Error fetching schedule: {str(e)}"
+    url = f"{BASE}/league/hierarchy.json"
+    return str(_request(url))
 
 
-@mcp.resource("nba://series/{year}/{season_type}/schedule")
-def get_series_schedule(year: int, season_type: str) -> str:
+@mcp.resource("nba://league/seasons")
+def league_seasons():
     """
-    Get the series schedule for a specific season.
-    Args:
-        year: Season year (e.g., 2023)
-        season_type: 'PST' (Postseason) usually
+    Seasons
+
+    URL Format:
+        league/seasons.json
+
+    Description:
+        Returns all NBA seasons available in the Sportradar database, including
+        preseason, regular season, tournaments, and playoffs.
+
     Returns:
-        JSON object with 'series' list. Each series contains 'id', 'title', 'round', 'participants', and 'games'.
+        dict: JSON list of seasons
     """
-    endpoint = f"series/{year}/{season_type}/schedule"
-    data = _make_request(endpoint)
-    return str(data)
+    url = f"{BASE}/league/seasons.json"
+    return str(_request(url))
 
 
 @mcp.tool
-def get_league_leaders(year: int, season_type: str) -> dict:
+def league_leaders(season_year: int, season_type: str):
     """
-    Get league leaders for a specific season.
-    Args:
-        year: Season year (e.g., 2023)
-        season_type: 'REG', 'PRE', 'PST'
+    League Leaders
+
+    URL Format:
+        seasons/{season_year}/{season_type}/leaders.json
+
+    Description:
+        Provides per-category league leaders along with full seasonal statistics,
+        including totals and averages.
+
+    Parameters:
+        season_year (int): Year in YYYY format
+        season_type (str): PRE, REG, IST, PIT, PST
+
     Returns:
-        JSON object with categories (e.g., 'points', 'rebounds'). Each category has a 'leaders' list of players with rank and value.
+        dict: JSON containing leader categories and ranked player data
     """
-    endpoint = f"seasons/{year}/{season_type}/leaders"
-    return _make_request(endpoint)
+    url = f"{BASE}/seasons/{season_year}/{season_type}/leaders.json"
+    return _request(url)
 
 
 @mcp.tool
-def get_rankings(year: int, season_type: str) -> dict:
+def season_rankings(season_year: int, season_type: str):
     """
-    Get team rankings for a specific season.
-    Args:
-        year: Season year (e.g., 2023)
-        season_type: 'REG', 'PRE', 'PST'
+    Rankings
+
+    URL Format:
+        seasons/{season_year}/{season_type}/rankings.json
+
+    Description:
+        Provides division and conference ranking for all teams, including
+        clinching status and nightly records.
+
+    Parameters:
+        season_year (int): Season start year (e.g., 2024)
+        season_type (str): PRE, REG, IST, PIT, PST
+
     Returns:
-        JSON object with 'conferences' list. Each conference has 'divisions' and 'teams' with rank, wins, losses, etc.
+        dict: JSON containing team rankings
     """
-    endpoint = f"seasons/{year}/{season_type}/rankings"
-    return _make_request(endpoint)
+    url = f"{BASE}/seasons/{season_year}/{season_type}/rankings.json"
+    return _request(url)
 
 
 @mcp.tool
-def get_seasonal_statistics(year: int, season_type: str, team_id: str) -> dict:
+def full_season_schedule(season_year: int, season_type: str):
     """
-    Get statistics for a team in a specific season.
-    Args:
-        year: Season year
-        season_type: 'REG', 'PRE', 'PST'
-        team_id: Team ID
+    Full Season Schedule
+
+    URL Format:
+        games/{season_year}/{season_type}/schedule.json
+
+    Description:
+        Returns the complete schedule (date, time, venue, opponents) for the
+        given season and season type.
+
+    Parameters:
+        season_year (int): Season year in YYYY format
+        season_type (str): PRE, REG, IST, PIT, PST
+
     Returns:
-        JSON object with 'own_record' (total, average) and 'opponents' stats. Includes field goals, rebounds, etc.
+        dict: JSON schedule for the full season
     """
-    endpoint = f"seasons/{year}/{season_type}/teams/{team_id}/statistics"
-    return _make_request(endpoint)
+    url = f"{BASE}/games/{season_year}/{season_type}/schedule.json"
+    return _request(url)
+
+
+@mcp.resource("nba://league/teams")
+def league_teams():
+    """
+    Teams
+
+    URL Format:
+        league/teams.json
+
+    Description:
+        Returns all active NBA teams.
+
+    Returns:
+        dict: JSON list of teams
+    """
+    url = f"{BASE}/league/teams.json"
+    return str(_request(url))
+
+
+# ============================================================
+# PLAYER ENDPOINT (1)
+# ============================================================
+
+
+@mcp.resource("nba://player/{player_id}/profile")
+def player_profile(player_id: str):
+    """
+    Player Profile
+
+    URL Format:
+        players/{player_id}/profile.json
+
+    Description:
+        Provides player biographical info, season-by-season statistics, draft
+        details, and team associations.
+
+    Parameters:
+        player_id (str): Unique player identifier
+
+    Returns:
+        dict: JSON player profile
+    """
+    url = f"{BASE}/players/{player_id}/profile.json"
+    return str(_request(url))
+
+
+# ============================================================
+# TEAM ENDPOINTS (3)
+# ============================================================
+
+
+@mcp.resource("nba://team/{team_id}/profile")
+def team_profile(team_id: str):
+    """
+    Team Profile
+
+    URL Format:
+        teams/{team_id}/profile.json
+
+    Description:
+        Returns high-level team information including coaches, roster, injuries,
+        venue details, and player references.
+
+    Parameters:
+        team_id (str): Unique team identifier
+
+    Returns:
+        dict: JSON team profile data
+    """
+    url = f"{BASE}/teams/{team_id}/profile.json"
+    return str(_request(url))
+
+
+@mcp.resource("nba://team/{team_id}/depth-chart")
+def team_depth_chart(team_id: str):
+    """
+    Team Depth Chart
+
+    URL Format:
+        teams/{team_id}/depth_chart.json
+
+    Description:
+        Provides the current positional depth chart for the specified NBA team.
+        Includes ordering at each position, coach information, and active roster
+        relevant for depth assignments.
+
+    Parameters:
+        team_id (str): Unique team identifier
+
+    Returns:
+        dict: JSON team depth chart
+    """
+    url = f"{BASE}/teams/{team_id}/depth_chart.json"
+    return str(_request(url))
 
 
 @mcp.tool
-def get_series_statistics(series_id: str, team_id: str) -> dict:
+def seasonal_statistics(season_year: int, season_type: str, team_id: str):
     """
-    Get statistics for a specific series.
-    Args:
-        series_id: Series ID
-        team_id: Team ID
+    Seasonal Statistics
+
+    URL Format:
+        seasons/{season_year}/{season_type}/teams/{team_id}/statistics.json
+
+    Description:
+        Provides full seasonal statistics for the specified team, including totals
+        and averages for team performance, player contributions, and opponent stats.
+
+    Parameters:
+        season_year (int): Season start year (YYYY)
+        season_type (str): PRE, REG, IST, PIT, PST
+        team_id (str): Unique team identifier
+
     Returns:
-        JSON object with 'series' info and 'team' stats for that series.
+        dict: JSON containing detailed seasonal statistics
     """
-    endpoint = f"series/{series_id}/teams/{team_id}/statistics"
-    return _make_request(endpoint)
+    url = f"{BASE}/seasons/{season_year}/{season_type}/teams/{team_id}/statistics.json"
+    return _request(url)
 
 
-@mcp.resource("nba://standings/{year}/{season_type}")
-def get_standings(year: int, season_type: str) -> str:
-    """
-    Get NBA standings for a specific season.
-    Args:
-        year: Season year (e.g., 2023)
-        season_type: 'REG' (Regular Season), 'PRE' (Preseason), 'PST' (Postseason)
-    Returns:
-        JSON object with 'conferences' list. Teams include 'wins', 'losses', 'win_pct', 'games_behind', 'streak'.
-    """
-    endpoint = f"seasons/{year}/{season_type}/standings"
-    data = _make_request(endpoint)
-    return str(data)
+# ============================================================
+# SERIES ENDPOINT (1)
+# ============================================================
 
 
 @mcp.tool
-def get_game_boxscore(game_id: str) -> dict:
+def series_statistics(series_id: str, team_id: str):
     """
-    Get detailed boxscore for a specific NBA game.
-    Args:
-        game_id: The unique ID of the game
+    Series Statistics
+
+    URL Format:
+        series/{series_id}/teams/{team_id}/statistics.json
+
+    Description:
+        Provides detailed team and player statistics for a specific playoff series.
+        Includes seasonal totals/averages, opponent stats, and team-level metrics.
+
+    Parameters:
+        series_id (str): Unique series identifier
+        team_id (str): Team participating in the series
+
     Returns:
-        JSON object with 'game' info, 'home' and 'away' teams.
-        Teams contain 'scoring' (by quarter) and 'statistics' (totals and 'players' list with individual stats).
+        dict: JSON statistics for the requested series-team pair
     """
-    endpoint = f"games/{game_id}/boxscore"
-    return _make_request(endpoint)
+    url = f"{BASE}/series/{series_id}/teams/{team_id}/statistics.json"
+    return _request(url)
+
+
+# ============================================================
+# SPLITS ENDPOINTS (4)
+# ============================================================
 
 
 @mcp.tool
-def get_game_play_by_play(game_id: str) -> dict:
+def splits_game(season_year: int, season_type: str, team_id: str):
     """
-    Get detailed play-by-play data for a specific game.
-    Args:
-        game_id: The unique ID of the game
+    Game Splits
+
+    URL Format:
+        seasons/{season_year}/{season_type}/teams/{team_id}/splits/game.json
+
+    Description:
+        Provides detailed team, player, and opponent game-based splits including:
+        wins, losses, home, road, overtime, matchups, and performance above/below .500.
+
+    Parameters:
+        season_year (int): Season start year
+        season_type (str): PRE, REG, IST, PIT, PST
+        team_id (str): Unique team identifier
+
     Returns:
-        JSON object with 'periods' list. Each period contains 'events' list (e.g., shots, fouls, subs) with description and clock.
+        dict: JSON containing game split statistics
     """
-    endpoint = f"games/{game_id}/pbp"
-    return _make_request(endpoint)
+    url = f"{BASE}/seasons/{season_year}/{season_type}/teams/{team_id}/splits/game.json"
+    return _request(url)
 
 
 @mcp.tool
-def get_game_summary(game_id: str) -> dict:
+def splits_hierarchy(season_year: int, season_type: str, team_id: str):
     """
-    Get a summary of game details.
-    Args:
-        game_id: The unique ID of the game
+    Hierarchy Splits
+
+    URL Format:
+        seasons/{season_year}/{season_type}/teams/{team_id}/splits/hierarchy.json
+
+    Description:
+        Provides splits by conference and division opponents, including totals and
+        averages for both team and opponent metrics.
+
+    Parameters:
+        season_year (int): Season start year
+        season_type (str): PRE, REG, IST, PIT, PST
+        team_id (str): Unique team identifier
+
     Returns:
-        JSON object with 'game' info, 'home' and 'away' scoring by quarter, and high-level stats.
+        dict: JSON containing hierarchy-based split data
     """
-    endpoint = f"games/{game_id}/summary"
-    return _make_request(endpoint)
+    url = f"{BASE}/seasons/{season_year}/{season_type}/teams/{team_id}/splits/hierarchy.json"
+    return _request(url)
 
 
 @mcp.tool
-def get_team_profile(team_id: str) -> dict:
+def splits_ingame(season_year: int, season_type: str, team_id: str):
     """
-    Get team details and roster.
-    Args:
-        team_id: The unique ID of the team
+    In-Game Splits
+
+    URL Format:
+        seasons/{season_year}/{season_type}/teams/{team_id}/splits/ingame.json
+
+    Description:
+        Provides in-game splits such as higher FG%, turnovers, rebounds, fouls,
+        points over/under 100, and other in-game derived context categories.
+
+    Parameters:
+        season_year (int): Season start year
+        season_type (str): PRE, REG, IST, PIT, PST
+        team_id (str): Unique team identifier
+
     Returns:
-        JSON object with 'id', 'name', 'market', 'venue', 'hierarchy', and 'players' list (roster).
+        dict: JSON containing in-game split data
     """
-    endpoint = f"teams/{team_id}/profile"
-    return _make_request(endpoint)
+    url = (
+        f"{BASE}/seasons/{season_year}/{season_type}/teams/{team_id}/splits/ingame.json"
+    )
+    return _request(url)
 
 
 @mcp.tool
-def get_player_profile(player_id: str) -> dict:
+def splits_schedule(season_year: int, season_type: str, team_id: str):
     """
-    Get player details.
-    Args:
-        player_id: The unique ID of the player
+    Schedule Splits
+
+    URL Format:
+        seasons/{season_year}/{season_type}/teams/{team_id}/splits/schedule.json
+
+    Description:
+        Provides schedule-based splits including days of rest, last 5/10 games,
+        performance by weekday, month, and week of season.
+
+    Parameters:
+        season_year (int): Season start year
+        season_type (str): PRE, REG, IST, PIT, PST
+        team_id (str): Unique team identifier
+
     Returns:
-        JSON object with 'id', 'full_name', 'position', 'height', 'weight', 'birth_date', 'draft', and 'seasons' stats.
+        dict: JSON containing schedule split data
     """
-    endpoint = f"players/{player_id}/profile"
-    return _make_request(endpoint)
+    url = f"{BASE}/seasons/{season_year}/{season_type}/teams/{team_id}/splits/schedule.json"
+    return _request(url)
+
+
+# ============================================================
+# STANDINGS ENDPOINT (1)
+# ============================================================
 
 
 @mcp.tool
-def get_team_depth_chart(team_id: str) -> dict:
+def standings(season_year: int, season_type: str):
     """
-    Get the depth chart for a specific team.
-    Args:
-        team_id: The unique ID of the team
+    Standings
+
+    URL Format:
+        seasons/{season_year}/{season_type}/standings.json
+
+    Description:
+        Provides detailed standings including overall records, conference and
+        division rankings, and playoff clinching indicators.
+
+    Parameters:
+        season_year (int): Season start year
+        season_type (str): PRE, REG, IST, PIT, PST
+
     Returns:
-        JSON object with 'positions' list. Each position has 'players' list ordered by depth rank.
+        dict: JSON containing standings and ranking data
     """
-    endpoint = f"teams/{team_id}/depth_chart"
-    return _make_request(endpoint)
+    url = f"{BASE}/seasons/{season_year}/{season_type}/standings.json"
+    return _request(url)
 
 
-@mcp.tool
-def get_season_teams(year: int, season_type: str) -> dict:
-    """
-    Get list of teams for a specific season.
-    Args:
-        year: Season year
-        season_type: 'REG', 'PRE', 'PST'
-    Returns:
-        JSON object with 'teams' list containing basic team info for that season.
-    """
-    # Note: 'teams' endpoint might not exist directly in v8, but 'league/hierarchy' is standard.
-    # However, some docs mention seasons/{year}/{season_type}/teams. Let's try that.
-    endpoint = f"seasons/{year}/{season_type}/teams"
-    return _make_request(endpoint)
-
-
-# Splits Endpoints
-
-
-@mcp.tool
-def get_game_splits(game_id: str) -> dict:
-    """
-    Get splits for a specific game.
-    Args:
-        game_id: The unique ID of the game
-    Returns:
-        JSON object with 'home' and 'away' splits (e.g., shooting percentages by area).
-    """
-    endpoint = f"games/{game_id}/splits"
-    return _make_request(endpoint)
-
-
-@mcp.tool
-def get_season_splits(year: int, season_type: str, team_id: str) -> dict:
-    """
-    Get season splits for a team.
-    Args:
-        year: Season year
-        season_type: 'REG', 'PRE', 'PST'
-        team_id: Team ID
-    Returns:
-        JSON object with 'total', 'average', and 'opponents' stats broken down by various categories.
-    """
-    endpoint = f"seasons/{year}/{season_type}/teams/{team_id}/splits"
-    return _make_request(endpoint)
-
-
-@mcp.tool
-def get_in_game_splits(year: int, season_type: str, team_id: str) -> dict:
-    """
-    Get in-game splits for a team (e.g. performance by quarter).
-    Args:
-        year: Season year
-        season_type: 'REG', 'PRE', 'PST'
-        team_id: Team ID
-    Returns:
-        JSON object with stats broken down by 'quarters' or 'halves'.
-    """
-    endpoint = f"seasons/{year}/{season_type}/teams/{team_id}/splits/ingame"
-    return _make_request(endpoint)
-
-
-@mcp.tool
-def get_schedule_splits(year: int, season_type: str, team_id: str) -> dict:
-    """
-    Get schedule splits for a team (e.g. home vs away).
-    Args:
-        year: Season year
-        season_type: 'REG', 'PRE', 'PST'
-        team_id: Team ID
-    Returns:
-        JSON object with stats broken down by 'home', 'away', etc.
-    """
-    endpoint = f"seasons/{year}/{season_type}/teams/{team_id}/splits/schedule"
-    return _make_request(endpoint)
-
-
-@mcp.tool
-def get_hierarchy_splits(year: int, season_type: str, team_id: str) -> dict:
-    """
-    Get hierarchy splits for a team (e.g. vs conference/division).
-    Args:
-        year: Season year
-        season_type: 'REG', 'PRE', 'PST'
-        team_id: Team ID
-    Returns:
-        JSON object with stats broken down by 'conference' and 'division' opponents.
-    """
-    endpoint = f"seasons/{year}/{season_type}/teams/{team_id}/splits/hierarchy"
-    return _make_request(endpoint)
-
+# ============================================================
+# RUN SERVER
+# ============================================================
 
 if __name__ == "__main__":
     mcp.run(transport="http", host="0.0.0.0", port=8765)

@@ -88,12 +88,8 @@ export default function MarketDetail({ market, onBack }: MarketDetailProps) {
 
       const data = await response.json()
       // Extract probability_score from the root of the tree
-      const probabilityScore = data.tree?.probability_score
-      if (probabilityScore !== undefined && probabilityScore !== null) {
-        setPrediction(probabilityScore)
-      } else {
-        throw new Error("No probability score found in response")
-      }
+      const probabilityScore = data.probability
+      setPrediction(probabilityScore)
     } catch (err) {
       console.error("Error fetching prediction:", err)
       setPredictionError(err instanceof Error ? err.message : "Failed to fetch prediction")

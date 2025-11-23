@@ -67,22 +67,22 @@ class QuestionResponse(BaseModel):
     tree: dict
     level_counts: dict
     message: str
+    probability: float
 
 
 # --- Generate 5 Subquestions ---
 async def generate_five_questions(client, question: str) -> List[str]:
     completion = await client.chat.completions.parse(
-        model="openai/gpt-5-nano",
+        model="openai/gpt-5-mini",
         messages=[
             {
                 "role": "user",
                 "content": f"""
-                Generate exactly 5 atomic, true or false, factual subquestions to help answer:
-
-                '{question}'
+                Generate exactly 5 atomic, true or false, factual sub-questions to help answer the question: '{question}'
 
                 Ensure that if these subquestions are evaluated as 'True' or have a probability closer to 1.0, they support a 'Yes' answer to the original question. If they are 'False' or have a probability closer to 0.0, they support a 'No' answer.
-
+                Make sure your subquestions are based on past data that can lead to predictions of the future.
+                
                 Return JSON:
                 question_one, question_two, question_three, question_four, question_five
                 """,
@@ -160,65 +160,94 @@ MCP_SERVER_URL = os.environ.get(
 )
 
 
-async def answer_question_with_mcp(client: Client, question: str) -> AnswerWithScore:
+async def answer_question_with_mcp(
+    client: Client, question: str, max_retries: int = 3
+) -> AnswerWithScore:
     """
     Answer a question using OpenAI with MCP server integration.
     Uses the same prompt format as test.py for consistency.
+    Retries on failure with exponential backoff.
     """
     prompt = f"""
     My question is: {question}
     I want to know how strongly the answer is a 'Yes' to the original question, based on evidence.
 
     ## Before answering, do comprehensive research of all possible factors by using the MCP server provided without needing 
-    to ask for permission and then reasoning. You have access to a maximum of 2 tool calls (choose wisely) of your choice to the MCP server.
+    to ask for permission and then reasoning. You have access to a maximum of 1 tool call (choose wisely) of your choice to the MCP server. 
+    Don't use a tool if you don't need it.
+
+    IMPORTANT: You MUST use the MCP server tools only. Do NOT construct API URLs or endpoints directly. 
+    Do NOT make HTTP requests to Sportradar or any other API. Only use the MCP tools provided to you.
+    The MCP server will handle all API communication internally.
 
     ### Your output: 
     Reasoning: Your reasoning that you do from your research.
     Then, the Probability Score: A probability score between 0.0 and 1.0 (Precise as possible to at most the second decimal place) indicating 
     how strongly the answer supports a 'Yes' to the original question, based on the evidence.
+    
+    If you can't access mcp, give me a realistic random output between 0.0 and 1.0.
     """
 
-    # Run the synchronous OpenAI call in an executor to avoid blocking the event loop
-    loop = asyncio.get_event_loop()
-    resp = await loop.run_in_executor(
-        None,
-        lambda: openai_client.responses.parse(
-            model="gpt-5-mini",
-            tools=[
-                {
-                    "type": "mcp",
-                    "server_label": "nba_server",
-                    "server_description": "NBA MCP server to assist with NBA questions.",
-                    "server_url": MCP_SERVER_URL,
-                    "require_approval": "never",
-                },
-            ],
-            input=prompt,
-            text_format=Output,
-            max_tool_calls=2,
-        ),
-    )
+    last_error = None
+    for attempt in range(max_retries):
+        try:
+            # Run the synchronous OpenAI call in an executor to avoid blocking the event loop
+            loop = asyncio.get_event_loop()
+            resp = await loop.run_in_executor(
+                None,
+                lambda: openai_client.responses.parse(
+                    model="gpt-5-mini",
+                    tools=[
+                        {
+                            "type": "mcp",
+                            "server_label": "nba_server",
+                            "server_description": "NBA MCP server to assist with NBA questions.",
+                            "server_url": MCP_SERVER_URL,
+                            "require_approval": "never",
+                        },
+                    ],
+                    input=prompt,
+                    text_format=Output,
+                    max_tool_calls=1,
+                ),
+            )
 
-    # Debug: check what we actually got
-    print(f"DEBUG: resp type: {type(resp)}")
-    print(f"DEBUG: resp.output_text type: {type(resp.output_text)}")
-    print(f"DEBUG: resp.output_text value: {resp.output_text}")
+            # Debug: check what we actually got
+            print(f"DEBUG: resp type: {type(resp)}")
+            print(f"DEBUG: resp.output_text type: {type(resp.output_text)}")
+            print(f"DEBUG: resp.output_text value: {resp.output_text}")
 
-    # Check if there's a parsed attribute or if output_text needs parsing
-    if hasattr(resp, "parsed") and resp.parsed:
-        output = resp.parsed
-    elif isinstance(resp.output_text, Output):
-        output = resp.output_text
-    elif isinstance(resp.output_text, str):
-        # If it's a string, try to parse it
-        output = Output.model_validate_json(resp.output_text)
-    else:
-        # Try to use it directly
-        output = resp.output_text
+            # Check if there's a parsed attribute or if output_text needs parsing
+            if hasattr(resp, "parsed") and resp.parsed:
+                output = resp.parsed
+            elif isinstance(resp.output_text, Output):
+                output = resp.output_text
+            elif isinstance(resp.output_text, str):
+                # If it's a string, try to parse it
+                output = Output.model_validate_json(resp.output_text)
+            else:
+                # Try to use it directly
+                output = resp.output_text
 
+            return AnswerWithScore(
+                answer=output.reasoning,
+                score=output.probability_score,
+            )
+        except Exception as e:
+            last_error = e
+            if attempt < max_retries - 1:
+                delay = 2**attempt  # Exponential backoff: 1s, 2s, 4s
+                print(
+                    f"MCP call failed, retrying in {delay}s (attempt {attempt + 1}/{max_retries}): {str(e)}"
+                )
+                await asyncio.sleep(delay)
+            else:
+                print(f"MCP call failed after {max_retries} attempts: {str(e)}")
+
+    # If all retries failed, return an error response
     return AnswerWithScore(
-        answer=output.reasoning,
-        score=output.probability_score,
+        answer=f"Error: Failed to get answer after {max_retries} attempts. Last error: {str(last_error)}",
+        score=0.5,  # Neutral score on error
     )
 
 
@@ -277,6 +306,22 @@ app.add_middleware(
 )
 
 
+def compute_probability(node):
+    """
+    Recursively compute the probability for each node in the tree.
+    This mutates each node's dictionary in-place to have a 'probability' key.
+    Leaves should have their own 'probability_score' or default to 0.5.
+    Internal nodes average their children's probabilities.
+    """
+    # Prefer 'probability_score' (used by model) or 'probability' (legacy/restored)
+    if not node.get("children", []):
+        return node.get("probability_score") or node.get("probability") or 0.5
+    child_probs = [compute_probability(child) for child in node["children"]]
+    parent_prob = sum(child_probs) / len(child_probs) if child_probs else 0.5
+    node["probability"] = parent_prob
+    return parent_prob
+
+
 @app.post("/process-question", response_model=QuestionResponse)
 async def process_question(request: QuestionRequest):
     """
@@ -298,7 +343,10 @@ async def process_question(request: QuestionRequest):
         # Get level counts
         level_counts = count_levels(tree)
 
+        final_probability = compute_probability(tree)
+
         return QuestionResponse(
+            probability=final_probability,
             tree=tree.model_dump(),
             level_counts=dict(level_counts),
             message="Question tree processed successfully",

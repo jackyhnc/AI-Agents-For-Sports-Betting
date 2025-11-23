@@ -5,6 +5,7 @@ import MarketCard from "./market-card"
 import MarketDetail from "./market-detail"
 
 interface Market {
+  rules_primary: string
   id: string
   matchup: string
   sport: string
@@ -88,7 +89,7 @@ export default function MarketGrid() {
       } catch (err) {
         console.error("[v0] Error fetching Kalshi markets:", err)
         setError("Unable to load live NBA markets. Please try again.")
-        setMarkets(getFallbackMarkets())
+        setMarkets([])
       } finally {
         setLoading(false)
       }
@@ -99,87 +100,6 @@ export default function MarketGrid() {
     const interval = setInterval(fetchKalshiMarkets, 30000)
     return () => clearInterval(interval)
   }, [])
-
-  const getFallbackMarkets = (): Market[] => [
-    {
-      id: "1",
-      matchup: "Will Lakers win against Celtics?",
-      sport: "Basketball",
-      market: "Kalshi",
-      time: "Volume: ¢1.2M",
-      isLive: true,
-      yesPrice: 52,
-      noPrice: 48,
-      yesProbability: 52,
-      noProbability: 48,
-      trend: "up",
-    },
-    {
-      id: "2",
-      matchup: "Will Warriors score over 110 points?",
-      sport: "Basketball",
-      market: "Kalshi",
-      time: "Volume: ¢850K",
-      isLive: true,
-      yesPrice: 65,
-      noPrice: 35,
-      yesProbability: 65,
-      noProbability: 35,
-      trend: "up",
-    },
-    {
-      id: "3",
-      matchup: "Will Curry score over 25 points?",
-      sport: "Basketball",
-      market: "Kalshi",
-      time: "Volume: ¢2.1M",
-      isLive: true,
-      yesPrice: 58,
-      noPrice: 42,
-      yesProbability: 58,
-      noProbability: 42,
-      trend: "stable",
-    },
-    {
-      id: "4",
-      matchup: "Will Nets beat Knicks?",
-      sport: "Basketball",
-      market: "Kalshi",
-      time: "Volume: ¢590K",
-      isLive: true,
-      yesPrice: 42,
-      noPrice: 58,
-      yesProbability: 42,
-      noProbability: 58,
-      trend: "down",
-    },
-    {
-      id: "5",
-      matchup: "Will Heat win their next game?",
-      sport: "Basketball",
-      market: "Kalshi",
-      time: "Volume: ¢340K",
-      isLive: true,
-      yesPrice: 71,
-      noPrice: 29,
-      yesProbability: 71,
-      noProbability: 29,
-      trend: "up",
-    },
-    {
-      id: "6",
-      matchup: "Will Suns go on a 5-game winning streak?",
-      sport: "Basketball",
-      market: "Kalshi",
-      time: "Volume: ¢3.2M",
-      isLive: false,
-      yesPrice: 62,
-      noPrice: 38,
-      yesProbability: 62,
-      noProbability: 38,
-      trend: "stable",
-    },
-  ]
 
   if (selectedMarket) {
     return <MarketDetail market={selectedMarket} onBack={() => setSelectedMarket(null)} />
