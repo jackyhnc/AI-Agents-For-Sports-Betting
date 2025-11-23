@@ -17,6 +17,9 @@ from mcp.client.sse import sse_client
 from fastmcp.client.transports import StdioTransport
 from fastmcp import Client
 from openai import OpenAI
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
+import uvicorn
 
 
 # --- Pydantic Models ---
@@ -49,6 +52,20 @@ class AnswerWithScore(BaseModel):
 class Output(BaseModel):
     reasoning: str
     probability_score: float
+
+
+# --- FastAPI Request/Response Models ---
+class QuestionRequest(BaseModel):
+    question: str
+    max_depth: int = Field(
+        default=1, ge=1, le=3, description="Maximum depth of the question tree (1-3)"
+    )
+
+
+class QuestionResponse(BaseModel):
+    tree: dict
+    level_counts: dict
+    message: str
 
 
 # --- Generate 5 Subquestions ---
@@ -185,7 +202,6 @@ async def answer_question_with_mcp(client: Client, question: str) -> AnswerWithS
     print(f"DEBUG: resp type: {type(resp)}")
     print(f"DEBUG: resp.output_text type: {type(resp.output_text)}")
     print(f"DEBUG: resp.output_text value: {resp.output_text}")
-    print(f"DEBUG: resp attributes: {dir(resp)}")
 
     # Check if there's a parsed attribute or if output_text needs parsing
     if hasattr(resp, "parsed") and resp.parsed:
@@ -243,7 +259,53 @@ def count_levels(root: QuestionNode):
     return counter
 
 
-# --- Main ---
+# --- FastAPI App ---
+app = FastAPI(
+    title="Question Tree API",
+    description="API for building and processing question trees with MCP integration",
+    version="1.0.0",
+)
+
+
+@app.post("/process-question", response_model=QuestionResponse)
+async def process_question(request: QuestionRequest):
+    """
+    Process a question by building a question tree and answering all questions.
+
+    - **question**: The main question to process
+    - **max_depth**: Maximum depth of the question tree (default: 1, max: 3)
+    """
+    try:
+        print(f"Building question tree for: {request.question}")
+        tree = await build_question_tree(request.question, max_depth=request.max_depth)
+
+        print("Answering questions with MCP...")
+        await process_tree(tree)
+
+        # Save to JSON file
+        save_tree_to_json(tree, "nba_question_tree.json")
+
+        # Get level counts
+        level_counts = count_levels(tree)
+
+        return QuestionResponse(
+            tree=tree.model_dump(),
+            level_counts=dict(level_counts),
+            message="Question tree processed successfully",
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error processing question: {str(e)}"
+        )
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy"}
+
+
+# --- Main (Terminal Input) ---
 async def main():
     question = input("Enter a question: ")
     # tree = await build_question_tree(question)
@@ -264,4 +326,12 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    import sys
+
+    # If running with --api flag, start FastAPI server
+    if len(sys.argv) > 1 and sys.argv[1] == "--api":
+        port = int(os.environ.get("PORT", 8000))
+        uvicorn.run(app, host="0.0.0.0", port=port)
+    else:
+        # Otherwise, run the original terminal input version
+        asyncio.run(main())
