@@ -1,0 +1,7 @@
+project_id = "ziohpuqhgougyrfthjkq"
+
+[functions.fetch-kalshi-markets]
+verify_jwt = false
+
+[functions.analyze-bet]
+verify_jwt = false
