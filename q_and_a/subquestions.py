@@ -19,6 +19,7 @@ from fastmcp import Client
 from openai import OpenAI
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 
@@ -264,6 +265,15 @@ app = FastAPI(
     title="Question Tree API",
     description="API for building and processing question trees with MCP integration",
     version="1.0.0",
+)
+
+# Add CORS middleware to allow cross-origin requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with specific origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all HTTP methods including OPTIONS
+    allow_headers=["*"],
 )
 
 

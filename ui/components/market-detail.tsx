@@ -71,7 +71,7 @@ export default function MarketDetail({ market, onBack }: MarketDetailProps) {
       setPredictionError(null)
       setPrediction(null)
 
-      const response = await fetch("http://localhost:8000/process-question", {
+      const response = await fetch("http://127.0.0.1:8000/process-question", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
